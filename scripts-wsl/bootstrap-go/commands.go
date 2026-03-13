@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -25,20 +26,9 @@ type distroListMsg struct {
 	err     error
 }
 
-type installProgressMsg struct {
-	progress int
-	log      string
-	done     bool
-	err      error
-}
-
 type installCompleteMsg struct {
 	success bool
 	err     error
-}
-
-type logMsg struct {
-	content string
 }
 
 // getWorkingDir returns the scripts-wsl directory
@@ -86,11 +76,12 @@ func getScriptPath(script string) string {
 		debugPrint("WorkDir: %s", workDir)
 		debugPrint("FullPath: %s", fullPath)
 
-		// Check if file exists
-		if _, err := os.Stat(fullPath); os.IsNotExist(err) {
-			debugPrint("WARNING: File does not exist: %s", fullPath)
-		} else {
-			debugPrint("File exists: %s", fullPath)
+		if debugMode {
+			if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+				debugPrint("WARNING: File does not exist: %s", fullPath)
+			} else {
+				debugPrint("File exists: %s", fullPath)
+			}
 		}
 
 		return fullPath
@@ -101,6 +92,15 @@ func getScriptPath(script string) string {
 // stripAnsi removes ANSI escape codes from string
 func stripAnsi(str string) string {
 	return ansiRe.ReplaceAllString(str, "")
+}
+
+// streamOutput drains r line-by-line, sending each ANSI-stripped line to logChan.
+func streamOutput(r io.Reader, logChan chan string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	scanner := bufio.NewScanner(r)
+	for scanner.Scan() {
+		logChan <- stripAnsi(scanner.Text())
+	}
 }
 
 // checkWSLInstalled checks if running inside WSL
@@ -121,8 +121,6 @@ func checkWSLInstalled() tea.Cmd {
 // checkDistros lists installed distributions (always returns at least current distro)
 func checkDistros() tea.Cmd {
 	return func() tea.Msg {
-		// When running inside WSL, we are the distro
-		hostname, _ := os.Hostname()
 		distros := []Distro{
 			{
 				Name:    "Ubuntu-22.04",
@@ -131,7 +129,6 @@ func checkDistros() tea.Cmd {
 				Default: true,
 			},
 		}
-		_ = hostname
 		return distroListMsg{distros: distros, err: nil}
 	}
 }
@@ -163,23 +160,12 @@ func runScript(item MenuItem) tea.Cmd {
 			return installCompleteMsg{success: false, err: err}
 		}
 
-		// Read output
-		go func() {
-			scanner := bufio.NewScanner(stdout)
-			for scanner.Scan() {
-				// Just consume stdout
-			}
-		}()
-
-		go func() {
-			scanner := bufio.NewScanner(stderr)
-			for scanner.Scan() {
-				// Just consume stderr
-			}
-		}()
-
-		// Wait for completion
+		var wg sync.WaitGroup
+		wg.Add(2)
+		go func() { defer wg.Done(); scanner := bufio.NewScanner(stdout); for scanner.Scan() {} }()
+		go func() { defer wg.Done(); scanner := bufio.NewScanner(stderr); for scanner.Scan() {} }()
 		err = cmd.Wait()
+		wg.Wait()
 		return installCompleteMsg{
 			success: err == nil,
 			err:     err,
@@ -211,23 +197,8 @@ func runScriptWithLogs(item MenuItem, logChan chan string) tea.Cmd {
 
 		var wg sync.WaitGroup
 		wg.Add(2)
-
-		go func() {
-			defer wg.Done()
-			scanner := bufio.NewScanner(stdout)
-			for scanner.Scan() {
-				logChan <- stripAnsi(scanner.Text())
-			}
-		}()
-
-		go func() {
-			defer wg.Done()
-			scanner := bufio.NewScanner(stderr)
-			for scanner.Scan() {
-				logChan <- stripAnsi(scanner.Text())
-			}
-		}()
-
+		go streamOutput(stdout, logChan, &wg)
+		go streamOutput(stderr, logChan, &wg)
 		err = cmd.Wait()
 		wg.Wait()
 
@@ -249,6 +220,7 @@ func runAllInstall(logChan chan string) tea.Cmd {
 			"./install/dotfiles.sh",
 		}
 
+		workDir := getWorkingDir()
 		total := len(scripts)
 		for i, script := range scripts {
 			scriptPath := getScriptPath(script)
@@ -258,7 +230,7 @@ func runAllInstall(logChan chan string) tea.Cmd {
 			logChan <- strings.Repeat("-", 50)
 
 			cmd := exec.Command("bash", scriptPath)
-			cmd.Dir = getWorkingDir()
+			cmd.Dir = workDir
 
 			stdout, _ := cmd.StdoutPipe()
 			stderr, _ := cmd.StderrPipe()
@@ -270,22 +242,8 @@ func runAllInstall(logChan chan string) tea.Cmd {
 
 			var wg sync.WaitGroup
 			wg.Add(2)
-
-			go func() {
-				defer wg.Done()
-				scanner := bufio.NewScanner(stdout)
-				for scanner.Scan() {
-					logChan <- stripAnsi(scanner.Text())
-				}
-			}()
-
-			go func() {
-				defer wg.Done()
-				scanner := bufio.NewScanner(stderr)
-				for scanner.Scan() {
-					logChan <- stripAnsi(scanner.Text())
-				}
-			}()
+			go streamOutput(stdout, logChan, &wg)
+			go streamOutput(stderr, logChan, &wg)
 
 			if err := cmd.Wait(); err != nil {
 				wg.Wait()

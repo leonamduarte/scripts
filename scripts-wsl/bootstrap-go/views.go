@@ -27,12 +27,6 @@ var (
 				Foreground(lipgloss.Color("gray")).
 				Faint(true)
 
-	headerStyle = lipgloss.NewStyle().
-			Background(lipgloss.Color("cyan")).
-			Foreground(lipgloss.Color("black")).
-			Bold(true).
-			Padding(0, 1)
-
 	categoryStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("yellow")).
 			Bold(true).
@@ -85,7 +79,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = StateMenu
 				m.installing = ""
 				m.logs = []string{}
-				m.logChan = make(chan string, 100)
+				m.logChan = make(chan string, logChanSize)
 				return m, nil
 			}
 
@@ -135,7 +129,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.state = StateMenu
 				m.err = nil
 				m.logs = []string{}
-				m.logChan = make(chan string, 100)
+				m.logChan = make(chan string, logChanSize)
 				return m, nil
 			}
 		}
@@ -342,7 +336,7 @@ func (m Model) renderDone() string {
 			}
 
 			style := logStyle
-			if strings.HasPrefix(log, "[ERRO]") || strings.HasPrefix(log, "[FALHA]") {
+			if strings.HasPrefix(log, "[ERRO]") || strings.HasPrefix(log, "[FALHA]") || strings.HasPrefix(log, "[ERROR]") {
 				style = logErrorStyle
 			} else if strings.HasPrefix(log, "[OK]") || strings.HasPrefix(log, "[SUCESSO]") {
 				style = logSuccessStyle
@@ -380,11 +374,28 @@ func (m Model) renderError() string {
 		b.WriteString("  " + strings.Repeat("─", min(m.width-4, 76)) + "\n")
 
 		maxLogs := min(len(m.logs), 10)
-		for i := len(m.logs) - maxLogs; i < len(m.logs); i++ {
-			if i >= 0 {
-				b.WriteString("  " + m.logs[i] + "\n")
-			}
+		startIdx := len(m.logs) - maxLogs
+		if startIdx < 0 {
+			startIdx = 0
 		}
+		for i := startIdx; i < len(m.logs); i++ {
+			log := m.logs[i]
+			maxWidth := min(m.width-6, 74)
+			if len(log) > maxWidth {
+				log = log[:maxWidth-3] + "..."
+			}
+			style := logStyle
+			if strings.HasPrefix(log, "[ERRO]") || strings.HasPrefix(log, "[FALHA]") || strings.HasPrefix(log, "[ERROR]") {
+				style = logErrorStyle
+			} else if strings.HasPrefix(log, "[OK]") || strings.HasPrefix(log, "[SUCESSO]") {
+				style = logSuccessStyle
+			}
+			b.WriteString("  " + style.Render(log) + "\n")
+		}
+
+
+
+
 		b.WriteString("  " + strings.Repeat("─", min(m.width-4, 76)) + "\n")
 		b.WriteString("\n")
 	}
@@ -405,11 +416,4 @@ func (m Model) renderChecking() string {
 	b.WriteString(normalStyle.Render("  Aguarde..."))
 
 	return b.String()
-}
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

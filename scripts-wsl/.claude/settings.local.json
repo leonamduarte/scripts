@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /tmp && bash -c 'dirname \"$0\"')",
+      "Bash(find /mnt/c/Users/itinerario/leo/development/scripts/scripts-wsl/bootstrap-go -type f \\\\\\( -name \"*.go\" -o -name \"*.mod\" -o -name \"*.sum\" -o -name \"*.md\" -o -name \"*.txt\" \\\\\\) 2>/dev/null | head -20)",
+      "Bash(cd \"C:/Users/itinerario/leo/development/scripts/scripts-wsl/bootstrap-go\" && go build ./... 2>&1)",
+      "Bash(python3 -c \"\ncontent = open\\('C:/Users/itinerario/leo/development/scripts/scripts-wsl/bootstrap-go/views.go', 'r', encoding='utf-8'\\).read\\(\\)\nold = 'if strings.HasPrefix\\(log, \\\\\"[ERRO]\\\\\"\\) || strings.HasPrefix\\(log, \\\\\"[FALHA]\\\\\"\\) {\\\\n\\\\t\\\\t\\\\t\\\\tstyle = logErrorStyle\\\\n\\\\t\\\\t\\\\t} else if strings.HasPrefix\\(log, \\\\\"[OK]\\\\\"\\) || strings.HasPrefix\\(log, \\\\\"[SUCESSO]\\\\\"\\) {'\nnew = 'if strings.HasPrefix\\(log, \\\\\"[ERRO]\\\\\"\\) || strings.HasPrefix\\(log, \\\\\"[FALHA]\\\\\"\\) || strings.HasPrefix\\(log, \\\\\"[ERROR]\\\\\"\\) {\\\\n\\\\t\\\\t\\\\t\\\\tstyle = logErrorStyle\\\\n\\\\t\\\\t\\\\t} else if strings.HasPrefix\\(log, \\\\\"[OK]\\\\\"\\) || strings.HasPrefix\\(log, \\\\\"[SUCESSO]\\\\\"\\) {'\ncount = content.count\\(old\\)\nprint\\(f'Found {count} occurrences'\\)\nnew_content = content.replace\\(old, new\\)\nopen\\('C:/Users/itinerario/leo/development/scripts/scripts-wsl/bootstrap-go/views.go', 'w', encoding='utf-8'\\).write\\(new_content\\)\nprint\\('Done'\\)\n\")",
+      "Bash(cd \"C:/Users/itinerario/leo/development/scripts/scripts-wsl/bootstrap-go\" && go version)"
+    ]
+  }
+}

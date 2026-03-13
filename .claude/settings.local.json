@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(xargs ls:*)",
+      "Bash(du -sh /c/Users/itinerario/leo/development/scripts/*/ | sort -rh)"
+    ]
+  }
+}
