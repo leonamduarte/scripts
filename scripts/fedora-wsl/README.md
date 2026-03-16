@@ -1,28 +1,35 @@
-# bashln-scripts Fedora WSL Edition
+# fedora-wsl
 
-Colecao de scripts para configurar um ambiente de desenvolvimento no WSL com Fedora Linux.
+Scripts para provisionar um ambiente de desenvolvimento em Fedora Linux.
 
-## Objetivo
-
-Provisionar um setup de desenvolvimento no Fedora WSL com:
-- Fish + Starship
-- Alacritty
-- Neovim
-- CLI tools modernas: ripgrep, fd, bat, eza, fzf, zoxide, lazygit, yazi
-- Dev tools: git, GitHub CLI, fnm, Python, pipx
+Funciona em Fedora nativo e no WSL2. Scripts exclusivos de WSL sao marcados com `[WSL]`.
 
 ## Estrutura
 
 ```text
-scripts-wls/
-|- wsl-bootstrap
-|- main.sh
-|- lib/
-|- install/
-|- system/
-|- utils/
-|- wsl/
-\- go/fedora-wsl-bootstrap/
+fedora-wsl/
+├── main.sh             # dispatcher CLI
+├── lib/
+│   └── utils.sh        # funcoes compartilhadas (logging, dnf, backup)
+├── install/
+│   ├── base.sh         # essenciais do sistema
+│   ├── shell.sh        # Fish + Starship
+│   ├── cli-tools.sh    # ripgrep, fd, bat, eza, fzf, zoxide, lazygit, yazi
+│   ├── terminal.sh     # Alacritty
+│   ├── dev-tools.sh    # git, gh, fnm, neovim, python
+│   ├── dotfiles.sh     # clonar e linkar dotfiles
+│   └── bootstrap.sh    # [WSL] instalar Fedora no WSL via wsl.exe
+├── system/
+│   ├── update.sh       # dnf upgrade + autoremove
+│   ├── clean.sh        # limpar cache e logs antigos
+│   └── ports.sh        # listar portas em escuta
+├── utils/
+│   ├── big-files.sh    # encontrar arquivos grandes
+│   ├── open-folder.sh  # [WSL] abrir pasta no Explorer
+│   └── vscode.sh       # [WSL] abrir VSCode no diretorio atual
+└── wsl/
+    ├── clipboard.sh    # [WSL] configurar clip.exe / Get-Clipboard
+    └── mount-drives.sh # [WSL] listar drives Windows montados
 ```
 
 ## Uso rapido
@@ -30,30 +37,21 @@ scripts-wls/
 No Fedora WSL:
 
 ```bash
-git clone https://github.com/bashln/scripts ~/scripts-wls
-cd ~/scripts-wls
+git clone https://github.com/bashln/scripts ~/scripts
+cd ~/scripts/scripts/fedora-wsl
 ./main.sh install all
-```
-
-Se preferir a interface TUI em Go:
-
-```bash
-cd ~/scripts-wls/bootstrap-go
-go run .
 ```
 
 ## Bootstrap do Fedora no WSL
 
-No Windows, o bootstrap detecta automaticamente a release `FedoraLinux-*` mais recente disponivel em `wsl --list --online` e executa a instalacao correspondente.
-
-Via PowerShell:
+No Windows, via PowerShell (detecta automaticamente a release mais recente):
 
 ```powershell
-cd scripts\scripts-wls\install
+cd scripts\fedora-wsl\install
 .\bootstrap.ps1
 ```
 
-Ou via shell:
+Ou de dentro do WSL:
 
 ```bash
 ./main.sh install bootstrap
@@ -61,35 +59,67 @@ Ou via shell:
 
 ## Comandos
 
-```bash
-./main.sh install bootstrap
-./main.sh install base
-./main.sh install shell
-./main.sh install cli-tools
-./main.sh install terminal
-./main.sh install dev-tools
-./main.sh install dotfiles
-./main.sh install all
+### Instalacao
 
-./main.sh system update
-./main.sh system clean
-./main.sh system ports
+```bash
+./main.sh install base         # essenciais + update do sistema
+./main.sh install shell        # Fish + Starship
+./main.sh install cli-tools    # ripgrep, fd, bat, eza, fzf, etc
+./main.sh install terminal     # Alacritty
+./main.sh install dev-tools    # git, gh, fnm, neovim, python
+./main.sh install dotfiles     # clonar e configurar dotfiles
+./main.sh install bootstrap    # [WSL] instalar Fedora no WSL
+./main.sh install all          # executar sequencia completa
+./main.sh install list         # listar sequencia de instalacao
+./main.sh install dry-run      # mostrar o que seria executado
 ```
 
-## Diferencas desta versao
+### Sistema
 
-- `apt` foi substituido por `dnf`
-- bootstrap troca Ubuntu por Fedora WSL
-- scripts de shell, sistema e dev-tools foram ajustados para pacotes do Fedora
-- a pasta nova `scripts-wls` preserva a versao antiga `scripts/fedora-wsl`
+```bash
+./main.sh system update        # atualizar pacotes
+./main.sh system clean         # limpar cache e pacotes orfaos
+./main.sh system ports         # listar portas abertas
+```
+
+### Utilitarios
+
+```bash
+./main.sh utils big-files      # encontrar arquivos grandes
+./main.sh utils open-folder    # [WSL] abrir pasta no Explorer
+./main.sh utils vscode         # [WSL] abrir VSCode no diretorio atual
+```
+
+### WSL
+
+```bash
+./main.sh wsl clipboard        # [WSL] configurar clipboard
+./main.sh wsl mount-drives     # [WSL] listar discos Windows montados
+```
+
+## WSL vs Fedora generico
+
+Funciona em qualquer Fedora:
+
+- `install/base`, `shell`, `cli-tools`, `terminal`, `dev-tools`, `dotfiles`
+- `system/update`, `clean`, `ports`
+- `utils/big-files`
+
+Exclusivo de WSL (requer `wsl.exe`, `clip.exe` ou `explorer.exe`):
+
+- `install/bootstrap` — instala Fedora no WSL pelo Windows
+- `wsl/clipboard` — integracao com clip.exe / powershell Get-Clipboard
+- `wsl/mount-drives` — lista drives Windows montados em /mnt/
+- `utils/open-folder` — abre Explorer no diretorio atual
+- `utils/vscode` — abre VSCode via `code` no WSL
 
 ## Requisitos
 
-- Windows 10/11 com WSL2
-- Fedora Linux disponivel em `wsl --list --online`
-- acesso sudo dentro do WSL
+- Fedora Linux (nativo ou WSL2)
+- `sudo` disponivel
+- Para recursos `[WSL]`: Windows 10/11 com WSL2
 
 ## Observacoes
 
-- `Alacritty` depende de suporte grafico no WSL; se o pacote nao estiver disponivel no repositrio atual, o script apenas registra um aviso.
-- `eza`, `yazi` e `lazygit` usam fallback por download quando necessario.
+- `Alacritty` emite aviso se o pacote nao estiver disponivel no repositorio.
+- `eza`, `yazi` e `lazygit` usam fallback por download direto quando o pacote dnf nao existe.

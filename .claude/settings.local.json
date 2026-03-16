@@ -7,7 +7,9 @@
       "Bash(go test:*)",
       "Bash(python3:*)",
       "Bash(wc:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(bash -n /run/media/dev/stow/bashln/bashln/gitlab/scripts/scripts/fedora-wsl/main.sh && echo \"syntax ok\")"
     ]
   }
 }

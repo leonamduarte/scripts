@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# main.sh - Dispatcher CLI para scripts-wls
+# main.sh - Dispatcher CLI para fedora-wsl
 # Uso: ./main.sh <comando> <subcomando>
 # =============================================================================
 
@@ -22,6 +22,16 @@ ok() { echo -e "${GREEN}[OK]${NC} $*"; }
 warn() { echo -e "${YELLOW}[WARN]${NC} $*"; }
 error() { echo -e "${RED}[ERROR]${NC} $*"; }
 
+# Sequência canônica de instalação (usada por all, show_steps e dry-run)
+readonly -a INSTALL_STEPS=(
+	"install/base"
+	"install/shell"
+	"install/cli-tools"
+	"install/terminal"
+	"install/dev-tools"
+	"install/dotfiles"
+)
+
 # Menu de ajuda
 show_help() {
 	cat <<'EOF'
@@ -32,13 +42,16 @@ show_help() {
 Uso: ./main.sh <comando> <subcomando>
 
 INSTALAÇÃO:
-  ./main.sh install bootstrap    Instalar Fedora Linux no WSL
   ./main.sh install base         Essenciais + update do sistema
   ./main.sh install shell        Fish + Starship prompt
   ./main.sh install cli-tools    ripgrep, fd, bat, eza, fzf, etc
   ./main.sh install terminal     Alacritty
   ./main.sh install dev-tools    git, gh, fnm, neovim, python
   ./main.sh install dotfiles     Clonar e configurar dotfiles
+  ./main.sh install bootstrap    [WSL] Instalar Fedora Linux no WSL
+  ./main.sh install all          Executar sequência completa
+  ./main.sh install list         Listar sequência de instalação
+  ./main.sh install dry-run      Mostrar o que seria executado
 
 SISTEMA:
   ./main.sh system update        Atualizar pacotes
@@ -46,21 +59,18 @@ SISTEMA:
   ./main.sh system ports         Listar portas abertas
 
 UTILITÁRIOS:
-  ./main.sh utils open-folder    Abrir pasta atual no Explorer
-  ./main.sh utils vscode         Abrir VSCode no diretório atual
   ./main.sh utils big-files      Encontrar arquivos grandes
+  ./main.sh utils open-folder    [WSL] Abrir pasta atual no Explorer
+  ./main.sh utils vscode         [WSL] Abrir VSCode no diretório atual
 
 WSL:
-  ./main.sh wsl clipboard        Configurar clipboard
-  ./main.sh wsl mount-drives     Montar discos Windows
-
-INSTALAÇÃO COMPLETA:
-  ./main.sh install all          Executa todos os scripts de instalação
+  ./main.sh wsl clipboard        [WSL] Configurar clipboard (clip.exe)
+  ./main.sh wsl mount-drives     [WSL] Listar discos Windows montados
 
 EXEMPLOS:
   ./main.sh install base
   ./main.sh system update
-  ./main.sh utils open-folder
+  ./main.sh install dry-run
 
 EOF
 }
@@ -80,20 +90,34 @@ run_script() {
 	bash "$script_path"
 }
 
+# Listar sequência de instalação
+show_steps() {
+	info "Sequência de instalação:"
+	local i=1
+	for step in "${INSTALL_STEPS[@]}"; do
+		printf "  %d. %s\n" "$i" "$step"
+		i=$((i + 1))
+	done
+}
+
+# Dry-run: mostrar o que seria executado sem executar
+install_dry_run() {
+	info "[dry-run] Sequência que seria executada:"
+	for step in "${INSTALL_STEPS[@]}"; do
+		local script_path="$SCRIPT_DIR/$step.sh"
+		if [[ -f "$script_path" ]]; then
+			printf "  %-30s %s\n" "$step.sh" "[ok]"
+		else
+			printf "  %-30s %s\n" "$step.sh" "[não encontrado]"
+		fi
+	done
+}
+
 # Instalação completa
 install_all() {
 	info "Iniciando instalação completa..."
 
-	local scripts=(
-		"install/base"
-		"install/shell"
-		"install/cli-tools"
-		"install/terminal"
-		"install/dev-tools"
-		"install/dotfiles"
-	)
-
-	for script in "${scripts[@]}"; do
+	for script in "${INSTALL_STEPS[@]}"; do
 		local category="${script%/*}"
 		local name="${script#*/}"
 
@@ -122,38 +146,34 @@ main() {
 
 	case "$command" in
 	install)
-		if [[ "$subcommand" == "all" ]]; then
-			install_all
-		elif [[ -n "$subcommand" ]]; then
-			run_script "install" "$subcommand"
-		else
-			error "Especifique o subcomando: bootstrap, base, shell, cli-tools, terminal, dev-tools, dotfiles, ou all"
+		case "$subcommand" in
+		all) install_all ;;
+		list) show_steps ;;
+		dry-run) install_dry_run ;;
+		"")
+			error "Especifique: base, shell, cli-tools, terminal, dev-tools, dotfiles, bootstrap, all, list, dry-run"
 			exit 1
-		fi
+			;;
+		*) run_script "install" "$subcommand" ;;
+		esac
 		;;
 	system)
-		if [[ -n "$subcommand" ]]; then
-			run_script "system" "$subcommand"
-		else
-			error "Especifique: update, clean, ou ports"
-			exit 1
-		fi
+		case "$subcommand" in
+		"") error "Especifique: update, clean, ou ports"; exit 1 ;;
+		*) run_script "system" "$subcommand" ;;
+		esac
 		;;
 	utils)
-		if [[ -n "$subcommand" ]]; then
-			run_script "utils" "$subcommand"
-		else
-			error "Especifique: open-folder, vscode, ou big-files"
-			exit 1
-		fi
+		case "$subcommand" in
+		"") error "Especifique: open-folder, vscode, ou big-files"; exit 1 ;;
+		*) run_script "utils" "$subcommand" ;;
+		esac
 		;;
 	wsl)
-		if [[ -n "$subcommand" ]]; then
-			run_script "wsl" "$subcommand"
-		else
-			error "Especifique: clipboard ou mount-drives"
-			exit 1
-		fi
+		case "$subcommand" in
+		"") error "Especifique: clipboard ou mount-drives"; exit 1 ;;
+		*) run_script "wsl" "$subcommand" ;;
+		esac
 		;;
 	help | --help | -h)
 		show_help
