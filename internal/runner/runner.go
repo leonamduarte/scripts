@@ -33,49 +33,39 @@ type Event struct {
 
 const cancelGracePeriod = 1500 * time.Millisecond
 
+// buildArgs returns the executable name, arguments, and optional environment
+// for a script invocation. Shared by BuildCommand and BuildCommandWithContext.
+func buildArgs(script scripts.Script, logPath string) (name string, args []string, env []string) {
+	if script.RequiresRoot {
+		return "sudo", []string{"--preserve-env=LOG_FILE", "LOG_FILE=" + logPath, "bash", script.Path}, nil
+	}
+	return "bash", []string{script.Path}, append(os.Environ(), "LOG_FILE="+logPath)
+}
+
 func BuildCommand(script scripts.Script, logPath string) (*exec.Cmd, error) {
 	if err := validateScriptPath(script.Path); err != nil {
 		return nil, err
 	}
 
-	if script.RequiresRoot {
-		cmd := exec.Command(
-			"sudo",
-			"--preserve-env=LOG_FILE",
-			"LOG_FILE="+logPath,
-			"bash",
-			script.Path,
-		)
-		ensureProcessGroup(cmd)
-		return cmd, nil
+	name, args, env := buildArgs(script, logPath)
+	cmd := exec.Command(name, args...)
+	if env != nil {
+		cmd.Env = env
 	}
-
-	cmd := exec.Command("bash", script.Path)
-	cmd.Env = append(os.Environ(), "LOG_FILE="+logPath)
 	ensureProcessGroup(cmd)
 	return cmd, nil
 }
 
 func BuildCommandWithContext(ctx context.Context, script scripts.Script, logPath string) (*exec.Cmd, error) {
-	cmd, err := BuildCommand(script, logPath)
-	if err != nil {
+	if err := validateScriptPath(script.Path); err != nil {
 		return nil, err
 	}
 
-	if script.RequiresRoot {
-		cmd = exec.CommandContext(
-			ctx,
-			"sudo",
-			"--preserve-env=LOG_FILE",
-			"LOG_FILE="+logPath,
-			"bash",
-			script.Path,
-		)
-	} else {
-		cmd = exec.CommandContext(ctx, "bash", script.Path)
-		cmd.Env = append(os.Environ(), "LOG_FILE="+logPath)
+	name, args, env := buildArgs(script, logPath)
+	cmd := exec.CommandContext(ctx, name, args...)
+	if env != nil {
+		cmd.Env = env
 	}
-
 	ensureProcessGroup(cmd)
 	cmd.WaitDelay = cancelGracePeriod
 	cmd.Cancel = func() error {

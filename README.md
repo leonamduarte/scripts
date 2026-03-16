@@ -27,7 +27,7 @@ Esses scripts foram escritos para:
 ```
 bshln-scripts/
 ├── README.md
-├── scripts-arch/              # Scripts para Arch Linux / CachyOS
+├── scripts/arch/              # Scripts para Arch Linux / CachyOS
 │   ├── install-all.sh         # Orquestrador principal
 │   ├── update.sh              # Atualizacao leve
 │   ├── full-update.sh         # Atualizacao completa
@@ -36,7 +36,7 @@ bshln-scripts/
 │   └── assets/
 │       └── install-*.sh       # Scripts individuais
 │
-├── scripts-fedora/            # Scripts para Fedora Workstation 41+
+├── scripts/fedora-wsl/        # Scripts para Fedora Workstation 41+
 │   ├── install-all.sh         # Orquestrador principal
 │   ├── update.sh              # Atualizacao leve
 │   ├── full-update.sh         # Atualizacao completa
@@ -49,7 +49,7 @@ bshln-scripts/
 │   └── assets/
 │       └── install-*.sh       # Scripts individuais
 │
-├── scripts-apt/               # Scripts para Pop!_OS / Ubuntu
+├── scripts/apt/               # Scripts para Pop!_OS / Ubuntu
 │   ├── post-install-apt.sh
 │   ├── pop-update.sh
 │   ├── pop-clean.sh
@@ -69,7 +69,7 @@ bshln-scripts/
 Execute a interface TUI a partir da raiz do repositorio:
 
 ```bash
-go run ./cmd/bashln-tui --root ./scripts-arch
+go run ./cmd/bashln-tui --root ./scripts/arch
 ```
 
 Atalhos principais:
@@ -83,14 +83,14 @@ Atalhos principais:
 
 Flags disponiveis:
 
-- `--root <path>`: define a raiz do repositorio ou o diretorio `scripts-arch`
+- `--root <path>`: define a raiz do repositorio ou o diretorio `scripts/arch`
 - `--no-alt-screen`: desativa a tela alternativa do terminal
 
 ### Arch Linux / CachyOS
 
 ```bash
 git clone <repo-url>
-cd scripts/scripts-arch
+cd scripts/arch
 chmod +x *.sh assets/*.sh
 
 # Dependencias minimas
@@ -107,7 +107,7 @@ sudo pacman -S --needed git base-devel curl
 
 ```bash
 git clone <repo-url>
-cd scripts/scripts-fedora
+cd scripts/fedora-wsl
 chmod +x *.sh assets/*.sh
 
 # Dependencias minimas (ja vem com Fedora)
@@ -130,7 +130,7 @@ sudo dnf install -y git curl
 
 ```bash
 git clone <repo-url>
-cd scripts/scripts-apt
+cd scripts/apt
 
 # Instalacao completa
 ./post-install-apt.sh

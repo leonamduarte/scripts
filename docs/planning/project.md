@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Reestruturar a antiga pasta `scripts-arch` em um sistema interativo baseado em TUI para executar, acompanhar e controlar scripts de instalação no Arch Linux.
+Reestruturar a antiga pasta `scripts/arch` em um sistema interativo baseado em TUI para executar, acompanhar e controlar scripts de instalação no Arch Linux.
 
 O sistema permitirá:
 

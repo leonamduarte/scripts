@@ -382,7 +382,7 @@ func (m Model) View() string {
 	case modeSettings:
 		b.WriteString(m.styles.header.Render("Configuracoes") + "\n")
 		b.WriteString(m.styles.muted.Render("Controles: esc voltar | q sair") + "\n\n")
-		b.WriteString("Path scripts-arch: " + m.archPath + "\n")
+		b.WriteString("Path scripts/arch: " + m.archPath + "\n")
 		b.WriteString("Distro detectada: " + m.distroName + "\n")
 
 	case modeList, modeDone:

@@ -19,26 +19,36 @@ O objetivo do projeto e facilitar a configuracao rapida e reprodutivel de novos 
 
 ## Distribuicoes Suportadas
 
-### 1. Fedora Workstation (41+)
+### 1. Arch Linux / CachyOS
 
-Diretorio: `scripts-fedora/`
-
-- Gerenciador de pacotes: DNF
-- Repositorios extras: COPR, RPM Fusion
-- Suporte a Flatpak
-- Container Distrobox para pacotes AUR
-
-### 2. Arch Linux / CachyOS
-
-Diretorio: `scripts-arch/`
+Diretorio: `scripts/arch/`
 
 - Gerenciador de pacotes: pacman
 - Suporte a AUR (via yay/paru)
 - Suporte a Flatpak
 
-### 3. Pop!\_OS / Ubuntu (documentado, mas nao implementado)
+### 2. Ubuntu / Pop!_OS
+
+Diretorio: `scripts/apt/`
 
 - Gerenciador de pacotes: APT
+- Scripts para Pop!_OS e Ubuntu
+
+### 3. Ubuntu WSL
+
+Diretorio: `scripts/ubuntu-wsl/`
+
+- Bootstrap e setup para WSL com Ubuntu
+- Aplicativo TUI Go (Bubble Tea) para gerenciamento
+- Scripts de instalacao: base, shell, cli-tools, dev-tools, dotfiles
+
+### 4. Fedora WSL
+
+Diretorio: `scripts/fedora-wsl/`
+
+- Bootstrap e setup para WSL com Fedora
+- Aplicativo TUI Go (Bubble Tea) para gerenciamento
+- Scripts de instalacao: base, shell, cli-tools, dev-tools, dotfiles
 
 ---
 
@@ -48,47 +58,67 @@ Diretorio: `scripts-arch/`
 bashln-scripts/
 |
 +-- README.md                    # Documentacao principal
-+-- README.org                   # Documentacao em formato Org-mode
 +-- project.md                  # Planejamentos e objetivos do projeto
 +-- current-state.md            # Estado atual do desenvolvimento
 +-- blueprints.md                # Este arquivo
++-- go.mod                      # Modulo Go principal
 +-- .prettierrc                 # Configuracao de formatting
+|
++-- cmd/
+|   +-- bashln-tui/            # Aplicativo TUI Go (Bubble Tea)
+|       +-- main.go            # Entry point
+|
++-- internal/                   # Pacotes Go internos
+|   +-- app/                   # Modelo e logica TUI
+|   +-- runner/                # Executor de scripts
+|   +-- scripts/                # Descoberta e parsing de scripts
 |
 +-- docs/
 |   +-- EQUIVALENCES.md         # Tabela comparativa pacman vs dnf
 |   +-- MIGRATION.md            # Guia migracao Arch -> Fedora
+|   +-- planning/               # Documentacao de planejamento
 |
-+-- scripts-fedora/             # Scripts Fedora (mais completo)
-|   +-- install-all.sh         # Orquestrador principal
-|   +-- update.sh              # Atualizacao leve
-|   +-- full-update.sh         # Atualizacao completa com firmware
-|   +-- system-maintenance.sh  # Rotina completa de manutencao
-|   +-- copr-manager.sh         # Gerenciador repos COPR
-|   +-- flatpak-manager.sh      # Gerenciador apps Flatpak
-|   +-- distrobox-setup.sh      # Container Arch para AUR
-|   +-- fix-install-errors.sh   # Correcao de erros
-|   +-- lib/
-|   |   +-- utils.sh            # Biblioteca core (DNF/COPR)
-|   +-- assets/
-|   |   +-- install-*.sh       # 50+ scripts individuais
-|   |   +-- configure-git.sh   # Configuracao Git
-|   |   +-- set-shell.sh       # Define shell padrao
-|   |   +-- autofs.sh          # Configuracao automount
-|   |   +-- fix-services.sh    # Correcao servicos
-|   |   +-- *.conf             # Arquivos de configuracao
-|   +-- install.log            # Log de instalacao
-|   +-- fail.log               # Log de falhas
++-- scripts/                    # Scripts organizados por distribuicao
+|   +-- arch/                  # Scripts Arch Linux
+|   |   +-- install.sh         # Orquestrador principal
+|   |   +-- update.sh          # Atualizacao
+|   |   +-- full-update.sh     # Atualizacao completa
+|   |   +-- lib/
+|   |   |   +-- utils.sh      # Biblioteca core (pacman/AUR)
+|   |   +-- assets/
+|   |   |   +-- install-*.sh  # Scripts individuais
+|   |   +-- backup_scripts/   # Scripts de backup/legado (movido para antigos/)
+|   |
+|   +-- apt/                   # Scripts Ubuntu/Pop!_OS
+|   |   +-- install.sh        # Instalador principal
+|   |   +-- update.sh         # Atualizacao
+|   |   +-- clean.sh          # Limpeza
+|   |   +-- assets/           # Scripts e dotfiles
+|   |
+|   +-- ubuntu-wsl/            # Scripts Ubuntu WSL
+|   |   +-- main.sh           # Dispatcher CLI
+|   |   +-- go/ubuntu-wsl-bootstrap/  # Aplicativo TUI Go
+|   |   +-- install/          # Scripts de instalacao
+|   |   +-- system/           # Scripts de sistema
+|   |   +-- utils/            # Utilitarios
+|   |   +-- wsl/              # Scripts WSL
+|   |   +-- lib/              # Biblioteca compartilhada
+|   |
+|   +-- fedora-wsl/           # Scripts Fedora WSL
+|       +-- main.sh           # Dispatcher CLI
+|       +-- go/fedora-wsl-bootstrap/     # Aplicativo TUI Go
+|       +-- install/          # Scripts de instalacao
+|       +-- system/           # Scripts de sistema
+|       +-- utils/           # Utilitarios
+|       +-- wsl/             # Scripts WSL
+|       +-- lib/             # Biblioteca compartilhada
 |
-+-- scripts-arch/               # Scripts Arch Linux
-|   +-- install.sh             # Orquestrador principal
-|   +-- update.sh              # Atualizacao
-|   +-- full-update.sh         # Atualizacao completa
-|   +-- lib/
-|   |   +-- utils.sh           # Biblioteca core (pacman/AUR)
-|   +-- assets/
-|   |   +-- install-*.sh       # Scripts individuais
-|   +-- backup_scripts/        # Scripts de backup/legado
-|   +-- install.log
++-- antigos/                   # Arquivos antigos e desatualizados
+|   +-- arch/                 # Scripts Arch antigos
+|   +-- scripts-fedora/       # Scripts Fedora antigos
+|   +-- powershell/           # Scripts PowerShell antigos
+|   +-- wsl-binaries/         # Binarios wsl-bootstrap antigos
+|   +-- automate_trello_to_git/
 ```
 
 ---
@@ -99,19 +129,19 @@ bashln-scripts/
 
 | Tecnologia | Descricao                        | Uso                 |
 | ---------- | -------------------------------- | ------------------- |
-| pacman     | Gerenciador Arch                 | scripts-arch        |
-| dnf        | Gerenciador Fedora               | scripts-fedora      |
-| yay/paru   | AUR Helper                       | scripts-arch        |
-| copr       | Repositorios comunitarios Fedora | scripts-fedora      |
-| rpmfusion  | Repositorio extras Fedora        | scripts-fedora      |
+| pacman     | Gerenciador Arch                 | scripts/arch        |
+| dnf        | Gerenciador Fedora               | scripts/fedora-wsl  |
+| yay/paru   | AUR Helper                       | scripts/arch        |
+| copr       | Repositorios comunitarios Fedora | scripts/fedora-wsl      |
+| rpmfusion  | Repositorio extras Fedora        | scripts/fedora-wsl      |
 | flatpak    | Empacotamento universal          | Ambas distribuicoes |
 
 ### Ferramentas TUI
 
 | Ferramenta  | Descricao                        | Uso                                 |
 | ----------- | -------------------------------- | ----------------------------------- |
-| Gum (Charm) | TUI para output colorido einners | Logging sp e feedback visual        |
-| Bubble Tea  | Framework TUI em Go              | Planejado para interface interativa |
+| Bubble Tea  | Framework TUI em Go              | cmd/bashln-tui (principal)         |
+| Bubble Tea  | Framework TUI em Go              | scripts/*-wsl/bootstrap-go (WSL)   |
 
 ### Ferramentas de Container
 
@@ -205,9 +235,13 @@ O script install-all.sh executa todos os scripts em uma ordem especifica e categ
 
 ---
 
-## Gerenciadores Dedicados
+## Gerenciadores Dedicados (em antigos/)
 
-### COPR Manager (copr-manager.sh)
+Os seguintes gerenciadores foram movidos para o diretorio `antigos/`:
+
+### COPR Manager (antigos/scripts-fedora/copr-manager.sh)
+
+> ATENCAO: Este script foi movido para `antigos/scripts-fedora/`
 
 Equivalente ao AUR helper do Arch, gerencia repositorios COPR:
 
@@ -219,7 +253,9 @@ Equivalente ao AUR helper do Arch, gerencia repositorios COPR:
 ./copr-manager.sh disable <repo>   # Desabilita repositorio
 ```
 
-### Flatpak Manager (flatpak-manager.sh)
+### Flatpak Manager (antigos/scripts-fedora/flatpak-manager.sh)
+
+> ATENCAO: Este script foi movido para `antigos/scripts-fedora/`
 
 Gerencia aplicacoes Flatpak:
 
@@ -232,7 +268,9 @@ Gerencia aplicacoes Flatpak:
 ./flatpak-manager.sh size           # Espaco usado
 ```
 
-### Distrobox Setup (distrobox-setup.sh)
+### Distrobox Setup (antigos/scripts-fedora/distrobox-setup.sh)
+
+> ATENCAO: Este script foi movido para `antigos/scripts-fedora/`
 
 Cria container Arch Linux para pacotes AUR sem equivalente Fedora:
 
@@ -268,7 +306,9 @@ Isso permite executar os scripts multiplas vezes sem causar erros ou reinstalaco
 
 ---
 
-## COPR Repositorios Utilizados
+## COPR Repositorios Utilizados (historico)
+
+> ATENCAO: Estes repositorios eram utilizados pelos scripts em `antigos/scripts-fedora/`
 
 | COPR           | Pacotes    | Descricao               |
 | -------------- | ---------- | ----------------------- |
@@ -280,29 +320,12 @@ Isso permite executar os scripts multiplas vezes sem causar erros ou reinstalaco
 
 ---
 
-## Fluxo de Execucao Típico
+## Fluxo de Execucao Tipico
 
-### Fedora
-
-```bash
-cd scripts-fedora
-chmod +x *.sh assets/*.sh
-
-# Instalacao completa
-./install-all.sh
-
-# Atualizacao semanal
-./update.sh
-
-# Manutencao completa
-./system-maintenance.sh --dry-run  # Preview
-./system-maintenance.sh              # Executa
-```
-
-### Arch
+### Arch Linux
 
 ```bash
-cd scripts-arch
+cd scripts/arch
 chmod +x *.sh assets/*.sh
 
 # Instalacao
@@ -312,14 +335,48 @@ chmod +x *.sh assets/*.sh
 ./update.sh
 ```
 
+### Ubuntu / Pop!_OS
+
+```bash
+cd scripts/apt
+
+# Instalacao completa
+./install.sh
+
+# Atualizacao
+./update.sh
+```
+
+### Ubuntu WSL
+
+```bash
+cd scripts/ubuntu-wsl/bootstrap-go
+go run .
+
+# Ou usar CLI direto
+cd scripts/ubuntu-wsl
+./main.sh install all
+```
+
+### Fedora WSL
+
+```bash
+cd scripts/fedora-wsl/bootstrap-go
+go run .
+
+# Ou usar CLI direto
+cd scripts/fedora-wsl
+./main.sh install all
+```
+
 ---
 
 ## Documentacao
 
 - **docs/EQUIVALENCES.md**: Tabela completa de equivalencias entre comandos pacman e dnf
 - **docs/MIGRATION.md**: Guia detalhado de migracao do Arch para Fedora
+- **docs/planning/**: Documentacao de planejamento do projeto
 - **README.md**: Documentacao principal do projeto
-- **README.org**: Documentacao em formato Org-mode
 
 ---
 
@@ -328,10 +385,11 @@ chmod +x *.sh assets/*.sh
 Para adicionar novos scripts:
 
 1. Criar branch: `git checkout -b feature/novo-script`
-2. Adicionar script no diretorio da distribuicao
-3. Adicionar ao array STEPS em `install-all.sh`
-4. Testar: `./assets/install-novo-script.sh`
-5. Commit e pull request
+2. Adicionar script no diretorio da distribuicao (`scripts/<distro>/`)
+3. Para Arch: adicionar ao array STEPS em `install.sh`
+4. Para WSL: adicionar ao menu no TUI ou ao `main.sh`
+5. Testar: executar script individualmente
+6. Commit e pull request
 
 ---
 
@@ -343,8 +401,8 @@ MIT License - Use, modifique e compartilhe livremente.
 
 ## Estatisticas
 
-- **~50 scripts de instalacao** no directorio assets (Fedora)
-- **~45 scripts de instalacao** no directorio assets (Arch)
-- **3 gerenciadores especializados**: COPR, Flatpak, Distrobox
-- **2 implementacoes de utils.sh**: Fedora e Arch
-- **Suporte a 3 distribuicoes**: Fedora, Arch, Ubuntu (documentado)
+- **~70 scripts de instalacao** no directorio assets (Arch)
+- **~40 scripts de instalacao** no directorio assets (Ubuntu/Pop!_OS)
+- **4 distribuicoes suportadas**: Arch, Ubuntu, Ubuntu WSL, Fedora WSL
+- **2 implementacoes TUI em Go**: cmd/bashln-tui e scripts/*-wsl/bootstrap-go
+- **Invariantes**: Nao definidos

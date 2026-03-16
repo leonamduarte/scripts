@@ -15,8 +15,11 @@ import (
 )
 
 func main() {
-	rootFlag := flag.String("root", "", "Diretorio raiz do repositorio ou scripts-arch")
+	rootFlag := flag.String("root", "", "Diretorio raiz do repositorio ou scripts/arch")
 	noAltScreen := flag.Bool("no-alt-screen", false, "Desativa tela alternativa")
+	maxLogs := flag.Int("max-logs", app.DefaultMaxLogs, "Numero maximo de logs a manter")
+	maxAgeDays := flag.Int("max-age-days", app.DefaultMaxAgeDays, "Numero maximo de dias para manter logs")
+	noCompress := flag.Bool("no-compress", false, "Desativar compressao de logs antigos")
 	flag.Parse()
 
 	if !term.IsTerminal(int(os.Stdin.Fd())) || !term.IsTerminal(int(os.Stdout.Fd())) {
@@ -27,7 +30,7 @@ func main() {
 	root := filepath.Clean(resolveRoot(*rootFlag))
 	archDir, err := resolveArchDir(root)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "erro ao resolver scripts-arch: %v\n", err)
+		fmt.Fprintf(os.Stderr, "erro ao resolver scripts/arch: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -37,7 +40,18 @@ func main() {
 		os.Exit(1)
 	}
 
-	model := app.NewModel(list, filepath.Join(archDir, "install.log"))
+	logPath := filepath.Join(archDir, "install.log")
+	config := app.LogRotateConfig{
+		MaxLogs:    *maxLogs,
+		MaxAgeDays: *maxAgeDays,
+		Compress:   !*noCompress,
+	}
+	if err := app.RotateLogFileWithConfig(logPath, config); err != nil {
+		fmt.Fprintf(os.Stderr, "erro ao rotacionar log: %v\n", err)
+		// Continue anyway, as log rotation is not critical
+	}
+
+	model := app.NewModel(list, logPath)
 	options := []tea.ProgramOption{tea.WithInputTTY(), tea.WithOutput(os.Stdout)}
 	if !*noAltScreen {
 		options = append(options, tea.WithAltScreen())
@@ -68,7 +82,7 @@ func resolveRoot(rootFlag string) string {
 }
 
 func resolveArchDir(root string) (string, error) {
-	candidates := []string{root, filepath.Join(root, "scripts-arch")}
+	candidates := []string{root, filepath.Join(root, "scripts/arch")}
 
 	for _, dir := range candidates {
 		installPath := filepath.Join(dir, "install.sh")
@@ -83,7 +97,7 @@ func resolveArchDir(root string) (string, error) {
 		}
 	}
 
-	return "", errors.New("nao foi encontrado scripts-arch valido (esperado install.sh e assets/)")
+	return "", errors.New("nao foi encontrado scripts/arch valido (esperado install.sh e assets/)")
 }
 
 func fileExists(path string) bool {

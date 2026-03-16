@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(xargs ls:*)",
-      "Bash(du -sh /c/Users/itinerario/leo/development/scripts/*/ | sort -rh)"
+      "Bash(du -sh /c/Users/itinerario/leo/development/scripts/*/ | sort -rh)",
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(python3:*)",
+      "Bash(wc:*)",
+      "Bash(ls:*)"
     ]
   }
 }

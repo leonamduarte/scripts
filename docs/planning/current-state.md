@@ -36,6 +36,6 @@ O MVP (Minimum Viable Product) foi concluído, auditado e aprovado para produç�
 
 ## Próximos passos (Pós-MVP)
 
-- [ ] Limpeza de arquivos legados na pasta `scripts-arch/backup_scripts/`.
+- [ ] Limpeza de arquivos legados na pasta `scripts/arch/backup_scripts/`.
 - [ ] Implementar rotação de logs para o arquivo `install.log`.
 - [ ] Adicionar mais informações na tela de Configurações (versão, atalhos, etc).
