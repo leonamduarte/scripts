@@ -114,16 +114,15 @@ func osReleaseValue(line, key string) (string, bool) {
 }
 
 func resolveArchDir(root string) (string, error) {
-	// Se --root foi fornecido explicitamente, use como está
-	if root != "" && root != "." {
-		installPath := filepath.Join(root, "install.sh")
-		assetsPath := filepath.Join(root, "assets")
-		if fileExists(installPath) && dirExists(assetsPath) {
-			return filepath.Abs(root)
-		}
-		// Se não for válido, tentar scripts/arch como fallback para compatibilidade
-		root = filepath.Join(root, "scripts/arch")
+	// First, check if the given root is a valid script directory (has install.sh and assets)
+	installPath := filepath.Join(root, "install.sh")
+	assetsPath := filepath.Join(root, "assets")
+	if fileExists(installPath) && dirExists(assetsPath) {
+		return filepath.Abs(root)
 	}
+
+	// If not, then treat root as the repository root and try to detect the distro
+	// to find the correct scripts subdirectory.
 
 	// Detectar distro do sistema
 	distroID := detectSystemDistro()
@@ -154,12 +153,8 @@ func resolveArchDir(root string) (string, error) {
 		return filepath.Abs(dir)
 	}
 
-	// Tentar o root original
-	if fileExists(filepath.Join(root, "install.sh")) && dirExists(filepath.Join(root, "assets")) {
-		return filepath.Abs(root)
-	}
-
-	return "", fmt.Errorf("nenhum diretório de scripts válido encontrado (tentado: %s, scripts/arch, root)", scriptDir)
+	// Se nada funcionar, retornar erro
+	return "", fmt.Errorf("nenhum diretório de scripts válido encontrado em %s (tentado: %s, scripts/arch)", root, scriptDir)
 }
 
 func fileExists(path string) bool {
