@@ -1,0 +1,10 @@
+[Unit]
+Description=Setar resolução fixa no systemd-boot
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/set-monitor.sh
+
+[Install]
+WantedBy=multi-user.target

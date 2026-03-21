@@ -5,11 +5,18 @@
 
 set -euo pipefail
 
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[1;33m'
-readonly BLUE='\033[0;34m'
-readonly NC='\033[0m'
+_assign_ro() {
+    local var="$1" value="$2"
+    if ! (declare -p 2>/dev/null | grep -F "declare -r $var=" >/dev/null); then
+        readonly "$var"="$value"
+    fi
+}
+
+_assign_ro RED '\033[0;31m'
+_assign_ro GREEN '\033[0;32m'
+_assign_ro YELLOW '\033[1;33m'
+_assign_ro BLUE '\033[0;34m'
+_assign_ro NC '\033[0m'
 
 log_info() { echo -e "${BLUE}[INFO]${NC} $*" >&2; }
 log_ok() { echo -e "${GREEN}[OK]${NC} $*" >&2; }

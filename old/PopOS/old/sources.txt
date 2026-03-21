@@ -1,0 +1,48 @@
+total 24K
+drwxr-xr-x 2 root root 4,0K nov 11 19:50 .
+drwxr-xr-x 7 root root 4,0K nov 11 19:14 ..
+-rw-r--r-- 1 root root  144 nov 11 19:50 lutris-team-ubuntu-lutris-hirsute.list
+-rw-r--r-- 1 root root  133 nov  3 14:33 pop-os-apps.sources
+-rw-r--r-- 1 root root  130 nov 11 19:50 system76-ubuntu-pop-hirsute.list
+-rw-r--r-- 1 root root  291 nov  3 14:22 system.sources
+deb http://ppa.launchpad.net/lutris-team/lutris/ubuntu/ hirsute main
+# deb-src http://ppa.launchpad.net/lutris-team/lutris/ubuntu/ hirsute main
+X-Repolib-Name: Pop_OS Applications
+Enabled: yes
+Types: deb
+URIs: http://apt.pop-os.org/proprietary
+Suites: hirsute
+Components: main
+deb http://ppa.launchpad.net/system76/pop/ubuntu/ hirsute main
+deb-src http://ppa.launchpad.net/system76/pop/ubuntu/ hirsute main
+X-Repolib-Name: Pop_OS System Sources
+Enabled: yes
+Types: deb deb-src
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: hirsute hirsute-security hirsute-updates hirsute-backports
+Components: main restricted universe multiverse
+X-Repolib-Default-Mirror: http://us.archive.ubuntu.com/ubuntu/
+total 24K
+drwxr-xr-x 2 root root 4,0K nov 11 19:50 .
+drwxr-xr-x 7 root root 4,0K nov 11 19:14 ..
+-rw-r--r-- 1 root root  144 nov 11 19:50 lutris-team-ubuntu-lutris-hirsute.list
+-rw-r--r-- 1 root root  133 nov  3 14:33 pop-os-apps.sources
+-rw-r--r-- 1 root root  130 nov 11 19:50 system76-ubuntu-pop-hirsute.list
+-rw-r--r-- 1 root root  291 nov  3 14:22 system.sources
+deb http://ppa.launchpad.net/lutris-team/lutris/ubuntu/ hirsute main
+# deb-src http://ppa.launchpad.net/lutris-team/lutris/ubuntu/ hirsute main
+X-Repolib-Name: Pop_OS Applications
+Enabled: yes
+Types: deb
+URIs: http://apt.pop-os.org/proprietary
+Suites: hirsute
+Components: main
+deb http://ppa.launchpad.net/system76/pop/ubuntu/ hirsute main
+deb-src http://ppa.launchpad.net/system76/pop/ubuntu/ hirsute main
+X-Repolib-Name: Pop_OS System Sources
+Enabled: yes
+Types: deb deb-src
+URIs: http://us.archive.ubuntu.com/ubuntu/
+Suites: hirsute hirsute-security hirsute-updates hirsute-backports
+Components: main restricted universe multiverse
+X-Repolib-Default-Mirror: http://us.archive.ubuntu.com/ubuntu/
