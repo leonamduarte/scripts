@@ -45,25 +45,25 @@ func TestResolveScriptsDirWithVariant(t *testing.T) {
 			name:          "fedora silverblue",
 			distroID:      "fedora",
 			variantID:     "silverblue",
-			wantScriptDir: "scripts/fedora-atomic-silverblue",
+			wantScriptDir: "scripts/fedora-atomic",
 		},
 		{
 			name:          "fedora bazzite",
 			distroID:      "fedora",
 			variantID:     "bazzite",
-			wantScriptDir: "scripts/fedora-atomic-bazzite",
+			wantScriptDir: "scripts/fedora-atomic",
 		},
 		{
 			name:          "fedora kinoite",
 			distroID:      "fedora",
 			variantID:     "kinoite",
-			wantScriptDir: "scripts/fedora-atomic-kinoite",
+			wantScriptDir: "scripts/fedora-atomic",
 		},
 		{
 			name:          "fedora nordic",
 			distroID:      "fedora",
 			variantID:     "nordic",
-			wantScriptDir: "scripts/fedora-atomic-nordic",
+			wantScriptDir: "scripts/fedora-atomic",
 		},
 		{
 			name:          "regular fedora",
@@ -100,16 +100,9 @@ func resolveDistroToScriptDir(distroID, variantID string) string {
 	var scriptDir string
 	switch distroID {
 	case "fedora", "rhel", "centos", "rocky", "almalinux":
-		switch variantID {
-		case "bazzite":
-			scriptDir = "scripts/fedora-atomic-bazzite"
-		case "silverblue":
-			scriptDir = "scripts/fedora-atomic-silverblue"
-		case "kinoite":
-			scriptDir = "scripts/fedora-atomic-kinoite"
-		case "nordic":
-			scriptDir = "scripts/fedora-atomic-nordic"
-		default:
+		if variantID != "" {
+			scriptDir = "scripts/fedora-atomic"
+		} else {
 			scriptDir = "scripts/fedora"
 		}
 	case "ubuntu", "debian", "linuxmint", "pop":

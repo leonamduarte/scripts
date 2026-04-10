@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -123,6 +124,7 @@ func NewModel(list []scripts.Script, logPath string) Model {
 	overridePath := filepath.Join(archPath, "tui-overrides.json")
 	overrides, err := scripts.LoadOverrides(overridePath)
 	if err != nil {
+		log.Printf("warning: failed to load overrides from %s: %v - using defaults", overridePath, err)
 		overrides = scripts.Overrides{
 			Interactive:  map[string]bool{},
 			RequiresRoot: map[string]bool{},
