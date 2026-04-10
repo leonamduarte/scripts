@@ -121,7 +121,7 @@ sudo pacman -S --needed git base-devel curl
 
 ```bash
 git clone <repo-url>
-cd scripts/fedora-wsl
+cd scripts/fedora
 chmod +x *.sh assets/*.sh
 
 # Dependencias minimas (ja vem com Fedora)
@@ -140,7 +140,7 @@ sudo dnf install -y git curl
 ./system-maintenance.sh --dry-run
 ```
 
-Observacao: o diretorio se chama `scripts/fedora-wsl` por historico, mas atende Fedora nativo e WSL2. Apenas comandos marcados como `[WSL]` dependem de integracao com Windows.
+Observacao: o diretorio `scripts/fedora` atende Fedora nativo e WSL2. Apenas comandos marcados como `[WSL]` dependem de integracao com Windows.
 
 ### Pop!_OS / Ubuntu
 
