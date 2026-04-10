@@ -144,7 +144,7 @@ func resolveScriptsDir(root string) (string, error) {
 	case "fedora", "rhel", "centos", "rocky", "almalinux":
 		// Check for known Fedora Atomic variants
 		switch variantID {
-		case "bazzite", "silverblue", "kinoite", "nordic":
+		case "bazzite", "silverblue", "kinoite", "nordic", "cosmic":
 			scriptDir = "scripts/fedora-atomic"
 		default:
 			scriptDir = "scripts/fedora"
